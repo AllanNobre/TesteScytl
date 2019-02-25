@@ -44,10 +44,10 @@ class Connection:
                 bytes_count += 1
                 tmp_bytes_vector.append(bin(byte)[2:].zfill(8))
 
-        print(self.packets)
-
 
 def test_print(connection):
+    print(connection.packets)
+
     for a in connection.input_message:
         if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
             print("INICIO -------------")
@@ -68,3 +68,16 @@ if __name__ == "__main__":
     connection = Connection()
     connection.organize_packets()
     test_print(connection)
+
+    # print("================TESTE===============")
+    # a = connection.packets[0][0]
+    # print(a)
+
+    # b = int(a, 2)
+    # print(b)
+
+    # print(str(chr(b)))
+
+    # bit_mask = int('11110000', 2)
+
+    # print(bin(bit_mask & b)[2:].zfill(8))
