@@ -1,4 +1,5 @@
 import socket
+from BitsConversionTable import conversionTable4to5
 
 
 IP_ADRESS = "189.6.76.118"
@@ -58,6 +59,9 @@ def test_print(connection):
             print("FIM -------------")
 
         print("Inteiro {}  -  Binário {}  -  Hexadecimal {}".format(a, bin(a), hex(a)))
+
+    for key, val in conversionTable4to5.items():
+        print("Key 4 Bits: {}  -  Value 5 Bits: {}".format(key, val))
 
 
 if __name__ == "__main__":
