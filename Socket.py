@@ -13,31 +13,54 @@ class Connection:
     def __init__(self):
         self.soc = socket.socket()
         self.create_socket_connection()
+        self.receive_message()
 
     def create_socket_connection(self):
         self.soc.connect((IP_ADRESS, PORT))
 
     def receive_message(self):
-        input_message = self.soc.recv(RECEIVE_BUFFER_SIZE)
+        self.input_message = self.soc.recv(RECEIVE_BUFFER_SIZE)
 
-        return input_message
+    def organize_packets(self):
+        self.packets = []
+        bytes_count = 5
+        tmp_bytes_vector = []
+
+        for byte in self.input_message:
+            if chr(byte) == START_PACKET_HEX and bytes_count == 5:
+                print(str(chr(byte)))
+                bytes_count = 0
+                tmp_bytes_vector = []
+            elif chr(byte) == END_PACKET_HEX and bytes_count == 5:
+                print(str(chr(byte)))
+                self.packets.append(tmp_bytes_vector)
+                pass
+            elif chr(byte) == END_TRANSMISSION_HEX and bytes_count == 5:
+                print(str(chr(byte)))
+                self.packets.append(tmp_bytes_vector)
+                pass
+            else:
+                bytes_count += 1
+                tmp_bytes_vector.append(bin(byte)[2:].zfill(8))
+
+        print(self.packets)
+
+
+def test_print(connection):
+    for a in connection.input_message:
+        if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
+            print("INICIO -------------")
+
+        if chr(a) == END_PACKET_HEX:  # hex(int("11000110", 2)):
+            print("MEIO -------------")
+
+        if chr(a) == END_TRANSMISSION_HEX:  # hex(int("11000110", 2)):
+            print("FIM -------------")
+
+        print("Inteiro {}  -  Binário {}  -  Hexadecimal {}".format(a, bin(a), hex(a)))
 
 
 if __name__ == "__main__":
     connection = Connection()
-    input_message = connection.receive_message()
-    print(type(input_message))
-
-    for a in input_message:
-        if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
-            print("Inicio")
-
-        if chr(a) == END_PACKET_HEX:  # hex(int("11000110", 2)):
-            print("MEIO")
-
-        if chr(a) == END_TRANSMISSION_HEX:  # hex(int("11000110", 2)):
-            print("FIM")
-
-        print(type(a))
-        print(bin(a))
-        print(hex(a))
+    connection.organize_packets()
+    test_print(connection)
