@@ -8,6 +8,7 @@ RECEIVE_BUFFER_SIZE = 500
 START_PACKET_HEX = "\xC6"  # Hexadecimal start value 0xC6 (11000110)
 END_PACKET_HEX = "\x6B"  # Hexadecimal start value 0x6B (01101011)
 END_TRANSMISSION_HEX = "\x21"  # Hexadecimal start value 0x21 (00100001)
+LARGEST_PRIME_FACTOR = "00000101"  # Binary value to largest prime factor of 50080 that fit in a byte, that is 5
 
 
 class Connection:
@@ -198,11 +199,36 @@ class Connection:
 
             self.packets_5_bits_to_send.append(tmp_byte_vector)
 
+    def organize_message_in_byte_blocks_encodeds(self):
+        self.packets_8_bits_encodeds_to_send = []
+
+        # Concatenating the bits in a string to divide it into 8 pieces with 4-Bit
+        for packet in self.packets_5_bits_to_send:
+            tmp_bits_string = ""
+            tmp_byte_vector = []
+            bit_slice = ""
+
+            for byte in packet:
+                tmp_bits_string += byte
+
+            for bit in tmp_bits_string:
+                if len(bit_slice) != 8:
+                    bit_slice += bit
+                else:
+                    tmp_byte_vector.append(bit_slice)
+                    bit_slice = ""
+                    bit_slice += bit
+
+            tmp_byte_vector.append(bit_slice)
+
+            self.packets_8_bits_encodeds_to_send.append(tmp_byte_vector)
+
     def encode_message(self):
         self.handling_message_lenght()
         self.organize_message_in_byte_blocks()
         self.organize_packets_in_4_bits_blocks()
         self.convert_4_bits_into_5_bits()
+        self.organize_message_in_byte_blocks_encodeds()
 
 
 def test_print(connection):
@@ -215,6 +241,7 @@ def test_print(connection):
     print(connection.packets_8_bits_to_send)
     print(connection.packets_4_bits_to_send)
     print(connection.packets_5_bits_to_send)
+    print(connection.packets_8_bits_encodeds_to_send)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
