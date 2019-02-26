@@ -129,7 +129,7 @@ class Connection:
             if index % 2 == 1:
                 treated_message += decoded_message[index].lower()
             else:
-                treated_message += decoded_message[index]
+                treated_message += decoded_message[index].upper()
 
         # Switching spaces to underline
         treated_message = treated_message.replace(" ", "_")
