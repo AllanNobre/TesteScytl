@@ -25,7 +25,6 @@ class Connection:
     def organize_packets_in_8_bits(self):
         self.packets_8_bits = []
         bytes_count = 5
-        tmp_bytes_vector = []
 
         for byte in self.input_message:
             if chr(byte) == START_PACKET_HEX and bytes_count == 5:
@@ -68,15 +67,85 @@ class Connection:
 
             self.packets_5_bits.append(tmp_bits_vector)
 
+    def convert_5_bits_into_4_bits(self):
+        self.packets_4_bits = []
+
+        for packet in self.packets_5_bits:
+            tmp_byte_vector = []
+
+            for block_5_bit in packet:
+                block_4_bit = self.find_4_bit_block_corresponding(block_5_bit)
+                tmp_byte_vector.append(block_4_bit)
+
+            self.packets_4_bits.append(tmp_byte_vector)
+
+    def find_4_bit_block_corresponding(self, block_5_bit):
+        for table_block_4_bit, table_block_5_bit in conversionTable4to5.items():
+            if table_block_5_bit == block_5_bit:
+                return table_block_4_bit
+
+    def mount_decoded_message(self):
+        self.decoded_message = ""
+
+        for packet in self.packets_4_bits:
+            tmp_bits_string = ""
+            block_transform = False
+
+            for block_4_bits in packet:
+                if block_transform:
+                    tmp_bits_string += block_4_bits
+
+                    self.decoded_message += self.transform_byte_into_ASCII(tmp_bits_string)
+
+                    tmp_bits_string = ""
+                    block_transform = False
+                else:
+                    tmp_bits_string = block_4_bits
+                    block_transform = True
+
+    def transform_byte_into_ASCII(self, tmp_bits_string):
+        byte = int(tmp_bits_string, 2)
+
+        return str(chr(byte))
+
     def decode_message(self):
         self.organize_packets_in_8_bits()
         self.organize_packets_in_5_bits()
+        self.convert_5_bits_into_4_bits()
+        self.mount_decoded_message()
+
+    def treat_message(self):
+        # Removing any trailing spaces
+        decoded_message = self.decoded_message
+        decoded_message = decoded_message.rstrip()
+
+        # Change odd characters are in lower case and the upper even
+        treated_message = ""
+        for index in range(0, len(decoded_message)):
+            if index % 2 == 1:
+                treated_message += decoded_message[index].lower()
+            else:
+                treated_message += decoded_message[index]
+
+        # Switching spaces to underline
+        treated_message = treated_message.replace(" ", "_")
+
+        # Inverting message
+        treated_message = treated_message[::-1]
+
+        self.treated_message = treated_message
+
+    def encode_message(self):
+        message = self.treated_message
 
 
 def test_print(connection):
     print("================TESTE===============")
     print(connection.packets_8_bits)
     print(connection.packets_5_bits)
+    print(connection.packets_4_bits)
+    print(connection.decoded_message)
+    print(connection.treated_message)
 
     for a in connection.input_message:
         if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
@@ -110,4 +179,7 @@ def test_print(connection):
 if __name__ == "__main__":
     connection = Connection()
     connection.decode_message()
+    connection.treat_message()
+    connection.encode_message()
+    # self.soc.send("OAK BSB ".encode())
     test_print(connection)
