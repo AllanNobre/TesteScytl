@@ -162,9 +162,34 @@ class Connection:
 
         self.packets_8_bits_to_send.append(tmp_bytes_vector)
 
+    def organize_packets_in_4_bits_blocks(self):
+        self.packets_4_bits_to_send = []
+
+        # Concatenating the bits in a string to divide it into 8 pieces with 4-Bit
+        for packet in self.packets_8_bits_to_send:
+            tmp_bits_string = ""
+            tmp_bits_vector = []
+            bit_slice = ""
+
+            for byte in packet:
+                tmp_bits_string += byte
+
+            for bit in tmp_bits_string:
+                if len(bit_slice) != 4:
+                    bit_slice += bit
+                else:
+                    tmp_bits_vector.append(bit_slice)
+                    bit_slice = ""
+                    bit_slice += bit
+
+            tmp_bits_vector.append(bit_slice)
+
+            self.packets_4_bits_to_send.append(tmp_bits_vector)
+
     def encode_message(self):
         self.handling_message_lenght()
         self.organize_message_in_byte_blocks()
+        self.organize_packets_in_4_bits_blocks()
 
 
 def test_print(connection):
@@ -175,6 +200,7 @@ def test_print(connection):
     print(connection.decoded_message)
     print(connection.treated_message)
     print(connection.packets_8_bits_to_send)
+    print(connection.packets_4_bits_to_send)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
