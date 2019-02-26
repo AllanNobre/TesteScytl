@@ -148,8 +148,23 @@ class Connection:
 
         self.treated_message = message
 
+    def organize_message_in_byte_blocks(self):
+        self.packets_8_bits_to_send = []
+        tmp_bytes_vector = []
+
+        for byte in self.treated_message:
+            if len(tmp_bytes_vector) != 4:
+                tmp_bytes_vector.append(bin(ord(byte))[2:].zfill(8))
+            else:
+                self.packets_8_bits_to_send.append(tmp_bytes_vector)
+                tmp_bytes_vector = []
+                tmp_bytes_vector.append(bin(ord(byte))[2:].zfill(8))
+
+        self.packets_8_bits_to_send.append(tmp_bytes_vector)
+
     def encode_message(self):
         self.handling_message_lenght()
+        self.organize_message_in_byte_blocks()
 
 
 def test_print(connection):
@@ -159,6 +174,7 @@ def test_print(connection):
     print(connection.packets_4_bits)
     print(connection.decoded_message)
     print(connection.treated_message)
+    print(connection.packets_8_bits_to_send)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
