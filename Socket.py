@@ -6,8 +6,11 @@ IP_ADRESS = "189.6.76.118"
 PORT = 50080
 RECEIVE_BUFFER_SIZE = 500
 START_PACKET_HEX = "\xC6"  # Hexadecimal start value 0xC6 (11000110)
-END_PACKET_HEX = "\x6B"  # Hexadecimal start value 0x6B (01101011)
-END_TRANSMISSION_HEX = "\x21"  # Hexadecimal start value 0x21 (00100001)
+END_PACKET_HEX = "\x6B"  # Hexadecimal end packet value 0x6B (01101011)
+END_TRANSMISSION_HEX = "\x21"  # Hexadecimal end connection value 0x21 (00100001)
+START_PACKET_BIN = "11000110"  # Binary start value
+END_PACKET_BIN = "01101011"  # Binary end packet value
+END_TRANSMISSION_BIN = "00100001"  # Binary end connection value
 LARGEST_PRIME_FACTOR = "00000101"  # Binary value to largest prime factor of 50080 that fit in a byte, that is 5
 
 
@@ -147,7 +150,7 @@ class Connection:
             for index in range(number_of_underlines):
                 message += "_"
 
-        self.treated_message = message
+        self.treated_message = message.encode("ASCII")
 
     def organize_message_in_byte_blocks(self):
         self.packets_8_bits_to_send = []
@@ -155,11 +158,11 @@ class Connection:
 
         for byte in self.treated_message:
             if len(tmp_bytes_vector) != 4:
-                tmp_bytes_vector.append(bin(ord(byte))[2:].zfill(8))
+                tmp_bytes_vector.append(bin(byte)[2:].zfill(8))
             else:
                 self.packets_8_bits_to_send.append(tmp_bytes_vector)
                 tmp_bytes_vector = []
-                tmp_bytes_vector.append(bin(ord(byte))[2:].zfill(8))
+                tmp_bytes_vector.append(bin(byte)[2:].zfill(8))
 
         self.packets_8_bits_to_send.append(tmp_bytes_vector)
 
@@ -236,6 +239,24 @@ class Connection:
 
             self.packets_with_xor.append(tmp_byte_vector)
 
+    def mount_encoded_message(self):
+        self.encoded_message = "".encode("ASCII")
+        message_packets_count = len(self.packets_with_xor)
+
+        for index in range(0, message_packets_count):
+            self.encoded_message += int(START_PACKET_BIN, 2).to_bytes(1, byteorder='big')
+
+            for byte in self.packets_with_xor[index]:
+                self.encoded_message += int(byte, 2).to_bytes(1, byteorder='big')
+
+            if index == message_packets_count - 1:
+                self.encoded_message += int(END_TRANSMISSION_BIN, 2).to_bytes(1, byteorder='big')
+            else:
+                self.encoded_message += int(END_PACKET_BIN, 2).to_bytes(1, byteorder='big')
+
+    def send_message(self):
+        self.soc.send(self.encoded_message)
+
     def encode_message(self):
         self.handling_message_lenght()
         self.organize_message_in_byte_blocks()
@@ -243,6 +264,8 @@ class Connection:
         self.convert_4_bits_into_5_bits()
         self.organize_message_in_byte_blocks_encodeds()
         self.apply_xor_in_bytes()
+        self.mount_encoded_message()
+        self.send_message()
 
 
 def test_print(connection):
@@ -257,6 +280,7 @@ def test_print(connection):
     print(connection.packets_5_bits_to_send)
     print(connection.packets_8_bits_encodeds_to_send)
     print(connection.packets_with_xor)
+    print(connection.encoded_message)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
@@ -292,5 +316,4 @@ if __name__ == "__main__":
     connection.decode_message()
     connection.treat_message()
     connection.encode_message()
-    # self.soc.send("OAK BSB ".encode())
     test_print(connection)
