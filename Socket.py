@@ -223,12 +223,26 @@ class Connection:
 
             self.packets_8_bits_encodeds_to_send.append(tmp_byte_vector)
 
+    def apply_xor_in_bytes(self):
+        self.packets_with_xor = []
+        largest_prime_factor_byte = int(LARGEST_PRIME_FACTOR, 2)
+
+        for packet in self.packets_8_bits_encodeds_to_send:
+            tmp_byte_vector = []
+
+            for binary_byte in packet:
+                byte = int(binary_byte, 2)
+                tmp_byte_vector.append(bin(byte ^ largest_prime_factor_byte)[2:].zfill(8))
+
+            self.packets_with_xor.append(tmp_byte_vector)
+
     def encode_message(self):
         self.handling_message_lenght()
         self.organize_message_in_byte_blocks()
         self.organize_packets_in_4_bits_blocks()
         self.convert_4_bits_into_5_bits()
         self.organize_message_in_byte_blocks_encodeds()
+        self.apply_xor_in_bytes()
 
 
 def test_print(connection):
@@ -242,6 +256,7 @@ def test_print(connection):
     print(connection.packets_4_bits_to_send)
     print(connection.packets_5_bits_to_send)
     print(connection.packets_8_bits_encodeds_to_send)
+    print(connection.packets_with_xor)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
