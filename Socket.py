@@ -186,10 +186,23 @@ class Connection:
 
             self.packets_4_bits_to_send.append(tmp_bits_vector)
 
+    def convert_4_bits_into_5_bits(self):
+        self.packets_5_bits_to_send = []
+
+        for packet in self.packets_4_bits_to_send:
+            tmp_byte_vector = []
+
+            for block_4_bit in packet:
+                block_5_bit = conversionTable4to5.get(block_4_bit)
+                tmp_byte_vector.append(block_5_bit)
+
+            self.packets_5_bits_to_send.append(tmp_byte_vector)
+
     def encode_message(self):
         self.handling_message_lenght()
         self.organize_message_in_byte_blocks()
         self.organize_packets_in_4_bits_blocks()
+        self.convert_4_bits_into_5_bits()
 
 
 def test_print(connection):
@@ -201,6 +214,7 @@ def test_print(connection):
     print(connection.treated_message)
     print(connection.packets_8_bits_to_send)
     print(connection.packets_4_bits_to_send)
+    print(connection.packets_5_bits_to_send)
 
     # for a in connection.input_message:
     #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
