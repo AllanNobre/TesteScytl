@@ -119,7 +119,7 @@ class Connection:
         decoded_message = self.decoded_message
         decoded_message = decoded_message.rstrip()
 
-        # Change odd characters are in lower case and the upper even
+        # Changing odd characters to lower case and the upper even
         treated_message = ""
         for index in range(0, len(decoded_message)):
             if index % 2 == 1:
@@ -135,8 +135,21 @@ class Connection:
 
         self.treated_message = treated_message
 
-    def encode_message(self):
+    def handling_message_lenght(self):
         message = self.treated_message
+        message_lenght = len(message)
+
+        # Padding right with underlines to turn message lenght divisible by 4 if needed
+        if message_lenght % 4 != 0:
+            number_of_underlines = 4 - message_lenght % 4
+
+            for index in range(number_of_underlines):
+                message += "_"
+
+        self.treated_message = message
+
+    def encode_message(self):
+        self.handling_message_lenght()
 
 
 def test_print(connection):
@@ -147,17 +160,17 @@ def test_print(connection):
     print(connection.decoded_message)
     print(connection.treated_message)
 
-    for a in connection.input_message:
-        if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
-            print("INICIO -------------")
+    # for a in connection.input_message:
+    #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
+    #         print("INICIO -------------")
 
-        if chr(a) == END_PACKET_HEX:  # hex(int("11000110", 2)):
-            print("MEIO -------------")
+    #     if chr(a) == END_PACKET_HEX:  # hex(int("11000110", 2)):
+    #         print("MEIO -------------")
 
-        if chr(a) == END_TRANSMISSION_HEX:  # hex(int("11000110", 2)):
-            print("FIM -------------")
+    #     if chr(a) == END_TRANSMISSION_HEX:  # hex(int("11000110", 2)):
+    #         print("FIM -------------")
 
-        print("Inteiro {}  -  Binário {}  -  Hexadecimal {}".format(a, bin(a), hex(a)))
+    #     print("Inteiro {}  -  Binário {}  -  Hexadecimal {}".format(a, bin(a), hex(a)))
 
     # for key, val in conversionTable4to5.items():
     #     print("Key 4 Bits: {}  -  Value 5 Bits: {}".format(key, val))
