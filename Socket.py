@@ -32,15 +32,12 @@ class Connection:
 
         for byte in self.input_message:
             if chr(byte) == START_PACKET_HEX and bytes_count == 5:
-                print(str(chr(byte)))
                 bytes_count = 0
                 tmp_bytes_vector = []
             elif chr(byte) == END_PACKET_HEX and bytes_count == 5:
-                print(str(chr(byte)))
                 self.packets_8_bits.append(tmp_bytes_vector)
                 pass
             elif chr(byte) == END_TRANSMISSION_HEX and bytes_count == 5:
-                print(str(chr(byte)))
                 self.packets_8_bits.append(tmp_bytes_vector)
                 pass
             else:
@@ -265,50 +262,6 @@ class Connection:
         self.organize_message_in_byte_blocks_encodeds()
         self.apply_xor_in_bytes()
         self.mount_encoded_message()
-        self.send_message()
-
-
-def test_print(connection):
-    print("================TESTE===============")
-    print(connection.packets_8_bits)
-    print(connection.packets_5_bits)
-    print(connection.packets_4_bits)
-    print(connection.decoded_message)
-    print(connection.treated_message)
-    print(connection.packets_8_bits_to_send)
-    print(connection.packets_4_bits_to_send)
-    print(connection.packets_5_bits_to_send)
-    print(connection.packets_8_bits_encodeds_to_send)
-    print(connection.packets_with_xor)
-    print(connection.encoded_message)
-
-    # for a in connection.input_message:
-    #     if chr(a) == START_PACKET_HEX:  # hex(int("11000110", 2)):
-    #         print("INICIO -------------")
-
-    #     if chr(a) == END_PACKET_HEX:  # hex(int("11000110", 2)):
-    #         print("MEIO -------------")
-
-    #     if chr(a) == END_TRANSMISSION_HEX:  # hex(int("11000110", 2)):
-    #         print("FIM -------------")
-
-    #     print("Inteiro {}  -  Binário {}  -  Hexadecimal {}".format(a, bin(a), hex(a)))
-
-    # for key, val in conversionTable4to5.items():
-    #     print("Key 4 Bits: {}  -  Value 5 Bits: {}".format(key, val))
-
-    # print("================CONVERSAO===============")
-    # a = connection.packets_8_bits[0][0]
-    # print(a)
-
-    # b = int(a, 2)
-    # print(b)
-
-    # print(str(chr(b)))
-
-    # bit_mask = int('11110000', 2)
-
-    # print(bin(bit_mask & b)[2:].zfill(8))
 
 
 if __name__ == "__main__":
@@ -316,4 +269,4 @@ if __name__ == "__main__":
     connection.decode_message()
     connection.treat_message()
     connection.encode_message()
-    test_print(connection)
+    connection.send_message()
